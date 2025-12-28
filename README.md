@@ -1,132 +1,152 @@
+
+<div align="center">
+
 # Flashare ⚡
 
-**CLI-First Hybrid File Sharing Tool**
+### Fast, Local, CLI-First File Sharing
 
-A power-user CLI hub for file transfers with a FastAPI backend, BLE connectivity, Zstandard compression, fzf integration, and a modern mobile web UI.
+[![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/Abhijit-without-h/flashare?style=flat-square&color=black)](https://github.com/Abhijit-without-h/flashare/releases)
+[![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
+[![Platform](https://img.shields.io/badge/platform-linux%20%7C%20macos%20%7C%20windows-lightgrey?style=flat-square)](https://github.com/Abhijit-without-h/flashare)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
+
+<p align="center">
+  Flashare is a <b>power-user tool</b> that lets you instantly share files between devices using a clean CLI workflow and a modern mobile web interface.<br>
+  <b>No cloud. No accounts. No setup.</b>
+</p>
+
+[Report Bug](https://github.com/Abhijit-without-h/flashare/issues) · [Request Feature](https://github.com/Abhijit-without-h/flashare/issues)
+
+</div>
 
 ---
 
-## Features
+## ✨ Why Flashare?
 
-- 🔍 **Fuzzy File Selection** - Use `fzf` to quickly select files to share
-- 📹 **Video Optimization** - Auto-transcode videos with FFmpeg for faster transfers
-- 🗜️ **Zstandard Compression** - 3-5x faster than gzip with better compression ratios
-- 📱 **Mobile Web UI** - Modern glassmorphism PWA interface
-- 📷 **QR Code** - Scan to connect on any device
+Built for developers and privacy-focused users who want transfers to *just work*.
+
+- ⚡ **Instant Local Transfers:** Direct P2P over Wi-Fi/LAN.
+- 🧠 **CLI-First Workflow:** Seamless integration with your terminal.
+- 📱 **Mobile-Friendly Web UI:** Scan a QR code and download.
+- 🗜️ **Smart Compression:** Uses Zstandard for speed and efficiency.
+- 📹 **Video Optimization:** Automatic transcoding for large media files.
+- 🔒 **Private by Design:** Files never leave your local network.
 
 ---
 
-## Installation
- 
-The easiest way to install Flashare is with a single command.
- 
+## 🚀 Key Features
+
+| Feature | Description |
+| :--- | :--- |
+| **Fuzzy Selection** | Interactive file picking powered by `fzf`. |
+| **Zstd Compression** | Faster and more efficient than standard gzip. |
+| **Auto-Transcode** | Optional FFmpeg optimization for smoother video sharing. |
+| **Modern UI** | A clean, responsive web interface for the receiver. |
+| **QR Code Share** | Generate a terminal QR code for instant mobile connection. |
+
+---
+
+## 📦 Installation (v0.1.2)
+
+Flashare installs as a **single binary** with no required runtime dependencies.
+
 ### macOS / Linux
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Abhijit-without-h/flashare/main/install.sh | sh
+curl -fsSL [https://raw.githubusercontent.com/Abhijit-without-h/flashare/main/install.sh](https://raw.githubusercontent.com/Abhijit-without-h/flashare/main/install.sh) | sh
+
 ```
 
 ### Windows (PowerShell)
+
 ```powershell
-irm https://raw.githubusercontent.com/Abhijit-without-h/flashare/main/install.ps1 | iex
+irm [https://raw.githubusercontent.com/Abhijit-without-h/flashare/main/install.ps1](https://raw.githubusercontent.com/Abhijit-without-h/flashare/main/install.ps1) | iex
+
 ```
 
-### Dependencies
-Flashare relies on `fzf` for file selection and `ffmpeg` for video optimization.
+> **Note:** After installation, please restart your terminal.
+
+### 🔧 Optional Dependencies
+
+While Flashare works standalone, installing these enhances the experience:
+
+* **`fzf`** — Enables the interactive file picker.
+* **`ffmpeg`** — Enables video compression/optimization.
+
 ```bash
 # macOS
 brew install fzf ffmpeg
 
-# Linux
+# Linux (Debian/Ubuntu)
 sudo apt install fzf ffmpeg
+
 ```
 
 ---
 
-## Usage
+## 🧭 Usage
 
 ### Quick Start
 
+Simply run the command to start the interactive wizard:
+
 ```bash
-# Start the file sharing wizard
 flashare
+
 ```
 
-This will:
-1. Open `fzf` to select a file
-2. Offer to optimize videos with FFmpeg
-3. Display a QR code for mobile connection
-4. Start the server
+**This will:**
 
-### CLI Options
+1. Open a file picker (if `fzf` is installed).
+2. Offer to optimize video files.
+3. Display a QR code.
+4. Start the local server.
 
-```bash
-# Share a specific file
-flashare /path/to/file.pdf
+### Command Reference
 
-# Start server only (share all files in uploads/)
-flashare --server-only
-
-# Custom port
-flashare --port 9000
-
-# Skip video optimization
-flashare --no-optimize
-
-# Start from a specific directory
-flashare --directory ~/Documents
-```
-
-### Mobile Access
-
-1. **QR Code**: Scan the QR code displayed in the terminal
-2. **URL**: Navigate to the URL shown (e.g., `http://192.168.1.10:8000`)
+| Action | Command |
+| --- | --- |
+| **Share specific file** | `flashare ~/Downloads/doc.pdf` |
+| **Share directory** | `flashare --directory ~/Documents` |
+| **Server only** | `flashare --server-only` |
+| **Custom port** | `flashare --port 9000` |
+| **Skip optimization** | `flashare --no-optimize` |
+| **Help** | `flashare --help` |
 
 ---
 
-## Project Structure
+## 📱 Receiving Files
 
-```
-flashare/
-├── pyproject.toml          # Project configuration
-├── src/flashare/
-│   ├── __init__.py         # Package init
-│   ├── __main__.py         # python -m flashare entry
-│   ├── config.py           # Configuration
-│   ├── server.py           # FastAPI server
-│   ├── core/
-│   │   ├── network.py      # IP detection
-│   │   ├── compression.py  # Zstandard compression
-│   │   ├── qr.py           # QR code generation
-│   │   └── ffmpeg.py       # Video optimization
-│   ├── api/
-│   │   └── routes.py       # API endpoints
-│   ├── cli/
-│   │   ├── main.py         # CLI entry point
-│   │   ├── fzf.py          # fzf wrapper
-│   │   └── ui.py           # Rich terminal UI
-│   └── static/
-│       ├── index.html      # Mobile web UI
-│       ├── styles.css      # Styling
-│       └── app.js          # Frontend logic
-└── uploads/                # Shared files directory
-```
+1. **Scan:** Use your phone to scan the QR code generated in your terminal.
+2. **Browse:** Alternatively, navigate to the URL shown (e.g., `http://192.168.1.X:8000`).
+3. **Download:** No app installation required on the receiving device.
 
 ---
 
-## API Endpoints
+## 🌱 Philosophy
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/` | GET | Mobile web UI |
-| `/api/files` | GET | List available files |
-| `/api/download/{filename}` | GET | Download file (Zstd compressed) |
-| `/api/upload` | POST | Upload file from phone |
-| `/api/qr` | GET | Get QR code data |
-| `/api/qr.png` | GET | Get QR code as PNG |
-| `/api/status` | GET | Server status |
+Flashare is built around three core principles:
+
+1. **Speed over complexity.**
+2. **Local over cloud.**
+3. **Ephemerality:** Tools that disappear once the job is done.
+
+**Run it. Share. Exit. Done.**
 
 ---
 
-## License
+## 🛡 Security
 
-MIT
+* **No Cloud Uploads:** Data never touches an external server.
+* **No Background Services:** The server dies when you close the terminal.
+* **Local Only:** Transfers are restricted to your local network (LAN).
+
+---
+
+## 📄 License
+
+Distributed under the MIT License. See `LICENSE` for more information.
+
+<div align="center">
+<sub>Built with ❤️ by <a href="https://www.google.com/search?q=https://github.com/Abhijit-without-h">Abhijit</a></sub>
+</div>
+
