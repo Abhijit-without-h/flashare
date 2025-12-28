@@ -28,7 +28,12 @@ $assetName = "flashare-windows-$arch.exe"
 # Fetch latest release URL
 Write-Host "🔍 Finding latest release..." -ForegroundColor Cyan
 try {
-    $releaseInfo = Invoke-RestMethod -Uri "https://api.github.com/repos/$repo/releases/latest"
+    # Get the first item from the releases list (supports pre-releases)
+    $releaseInfo = Invoke-RestMethod -Uri "https://api.github.com/repos/$repo/releases?per_page=1"
+    # releaseInfo might be an array if there are multiple releases, but per_page=1 should return an array of 1
+    if ($releaseInfo -is [array]) {
+        $releaseInfo = $releaseInfo[0]
+    }
     $asset = $releaseInfo.assets | Where-Object { $_.name -eq $assetName }
 } catch {
     Write-Error "❌ API Request failed. Please check your internet connection."

@@ -33,9 +33,9 @@ esac
 
 ASSET_NAME="flashare-${OS}-${ARCH}"
 
-# Fetch latest release URL
+# Fetch latest release URL (including pre-releases)
 echo "🔍 Finding latest version..."
-LATEST_RELEASE_URL=$(curl -s https://api.github.com/repos/$REPO/releases/latest | grep "browser_download_url" | grep "$ASSET_NAME" | cut -d '"' -f 4)
+LATEST_RELEASE_URL=$(curl -s "https://api.github.com/repos/$REPO/releases?per_page=1" | grep "browser_download_url" | grep "$ASSET_NAME" | head -n 1 | cut -d '"' -f 4)
 
 if [ -z "$LATEST_RELEASE_URL" ]; then
     echo -e "${RED}❌ Error: Could not find binary for $OS-$ARCH in the latest release.${NC}"
