@@ -44,15 +44,16 @@ if [ -z "$LATEST_RELEASE_URL" ]; then
 fi
 
 echo "📥 Downloading $ASSET_NAME..."
-curl -L --progress-bar -o "$BINARY_NAME" "$LATEST_RELEASE_URL"
-chmod +x "$BINARY_NAME"
+TEMP_FILE=$(mktemp)
+curl -L --progress-bar -o "$TEMP_FILE" "$LATEST_RELEASE_URL"
+chmod +x "$TEMP_FILE"
 
 echo "⚙️  Installing to $INSTALL_DIR..."
 if [ -w "$INSTALL_DIR" ]; then
-    mv "$BINARY_NAME" "$INSTALL_DIR/"
+    mv "$TEMP_FILE" "$INSTALL_DIR/$BINARY_NAME"
 else
     echo "⚠️  ROOT permission required to move binary to $INSTALL_DIR"
-    sudo mv "$BINARY_NAME" "$INSTALL_DIR/"
+    sudo mv "$TEMP_FILE" "$INSTALL_DIR/$BINARY_NAME"
 fi
 
 # Verification
