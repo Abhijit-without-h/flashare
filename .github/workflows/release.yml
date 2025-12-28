@@ -1,0 +1,90 @@
+name: Build and Release Binaries
+
+on:
+  release:
+    types: [created]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build for ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            artifact_name: flashare-linux-amd64
+            asset_name: flashare-linux-amd64
+          - os: macos-latest
+            artifact_name: flashare-darwin-amd64
+            asset_name: flashare-darwin-amd64
+          - os: windows-latest
+            artifact_name: flashare-windows-amd64.exe
+            asset_name: flashare-windows-amd64.exe
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install uv
+          uv sync 
+          uv pip install pyinstaller
+
+      - name: Build with PyInstaller (Unix)
+        if: matrix.os != 'windows-latest'
+        run: |
+          # Create a simple entry point script
+          echo "from flashare.cli.main import main; main()" > run_flashare.py
+          
+          # Build
+          uv run pyinstaller --onefile --name flashare \
+            --add-data "src/flashare/static:flashare/static" \
+            --hidden-import="uvicorn.logging" \
+            --hidden-import="uvicorn.loops" \
+            --hidden-import="uvicorn.loops.auto" \
+            --hidden-import="uvicorn.protocols" \
+            --hidden-import="uvicorn.protocols.http" \
+            --hidden-import="uvicorn.protocols.http.auto" \
+            --hidden-import="uvicorn.lifespan" \
+            --hidden-import="uvicorn.lifespan.on" \
+            run_flashare.py
+          
+          # Rename and move
+          mv dist/flashare dist/${{ matrix.artifact_name }}
+
+      - name: Build with PyInstaller (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          # Create a simple entry point script
+          echo "from flashare.cli.main import main; main()" > run_flashare.py
+          
+          # Build (Note semicolon for add-data on Windows)
+          uv run pyinstaller --onefile --name flashare `
+            --add-data "src/flashare/static;flashare/static" `
+            --hidden-import="uvicorn.logging" `
+            --hidden-import="uvicorn.loops" `
+            --hidden-import="uvicorn.loops.auto" `
+            --hidden-import="uvicorn.protocols" `
+            --hidden-import="uvicorn.protocols.http" `
+            --hidden-import="uvicorn.protocols.http.auto" `
+            --hidden-import="uvicorn.lifespan" `
+            --hidden-import="uvicorn.lifespan.on" `
+            run_flashare.py
+          
+          # Rename and move
+          mv dist/flashare.exe dist/${{ matrix.artifact_name }}
+
+      - name: Upload Release Asset
+        uses: softprops/action-gh-release@v1
+        if: github.event_name == 'release'
+        with:
+          files: dist/${{ matrix.artifact_name }}

@@ -92,6 +92,7 @@ def select_file(
 def select_multiple_files(
     start_dir: Optional[Path] = None,
     prompt: str = "Select files (TAB to multi-select) > ",
+    preview: bool = True,
 ) -> list[Path]:
     """
     Open fzf to select multiple files.
@@ -99,6 +100,7 @@ def select_multiple_files(
     Args:
         start_dir: Starting directory for file search.
         prompt: Prompt text to display.
+        preview: Whether to show file preview.
         
     Returns:
         List of selected file paths.
@@ -113,17 +115,25 @@ def select_multiple_files(
         f'find "{start_dir}" -type f '
         '-not -path "*/.*" '
         '-not -path "*/__pycache__/*" '
+        '-not -path "*/node_modules/*" '
+        '-not -path "*/.git/*" '
         '2>/dev/null'
     )
     
-    fzf_cmd = [
-        "fzf",
+    fzf_opts = [
         "--prompt", prompt,
         "--multi",  # Enable multi-select
         "--height", "80%",
         "--layout", "reverse",
         "--border", "rounded",
+        "--info", "inline",
     ]
+    
+    if preview:
+        preview_cmd = "head -50 {}" if not shutil.which("bat") else "bat --color=always --style=plain --line-range=:50 {}"
+        fzf_opts.extend(["--preview", preview_cmd])
+    
+    fzf_cmd = ["fzf"] + fzf_opts
     
     try:
         find_proc = subprocess.Popen(
@@ -137,6 +147,7 @@ def select_multiple_files(
             fzf_cmd,
             stdin=find_proc.stdout,
             stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
             text=True,
         )
         
