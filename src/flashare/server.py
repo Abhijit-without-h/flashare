@@ -12,37 +12,18 @@ from fastapi.middleware.cors import CORSMiddleware
 from flashare import __version__, __app_name__
 from flashare.config import config
 from flashare.api.routes import router as api_router
-from flashare.core.ble import start_ble_advertiser, BLEAdvertiser
-
-
-# Global BLE advertiser reference
-_ble_advertiser: BLEAdvertiser | None = None
-
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """
     Application lifespan handler.
-    
-    Starts BLE advertising on startup and stops it on shutdown.
     """
-    global _ble_advertiser
-    
     # Startup
     print(f"🚀 Starting {__app_name__} v{__version__}")
     print(f"📁 Uploads directory: {config.uploads_dir}")
     
-    # Start BLE advertiser in background
-    try:
-        _ble_advertiser = await start_ble_advertiser(config.port)
-    except Exception as e:
-        print(f"⚠️  BLE startup failed: {e}")
-    
     yield
     
     # Shutdown
-    if _ble_advertiser:
-        await _ble_advertiser.stop()
     print(f"👋 {__app_name__} shutting down")
 
 

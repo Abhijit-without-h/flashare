@@ -1,13 +1,12 @@
 [project]
 name = "flashare"
 version = "0.1.0"
-description = "CLI-First Hybrid File Sharing Tool with FastAPI backend, BLE connectivity, and mobile web UI"
+description = "CLI-First Hybrid File Sharing Tool with FastAPI backend and mobile web UI"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "fastapi",
     "uvicorn[standard]",
-    "bleak",
     "qrcode[pil]",
     "zstandard",
     "python-multipart",
@@ -16,7 +15,7 @@ dependencies = [
 ]
 
 [project.scripts]
-share = "flashare.cli.main:main"
+flashare = "flashare.cli.main:main"
 
 [build-system]
 requires = ["hatchling"]

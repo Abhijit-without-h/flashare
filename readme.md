@@ -12,34 +12,32 @@ A power-user CLI hub for file transfers with a FastAPI backend, BLE connectivity
 - 📹 **Video Optimization** - Auto-transcode videos with FFmpeg for faster transfers
 - 🗜️ **Zstandard Compression** - 3-5x faster than gzip with better compression ratios
 - 📱 **Mobile Web UI** - Modern glassmorphism PWA interface
-- 🔵 **BLE Discovery** - Android devices can discover the server via Bluetooth
 - 📷 **QR Code** - Scan to connect on any device
 
 ---
 
 ## Installation
-
-### Prerequisites
-
+ 
+The easiest way to install Flashare is with a single command.
+ 
+### macOS / Linux
 ```bash
-# Install system tools (macOS)
-brew install fzf ffmpeg
-
-# Or on Linux
-sudo apt install fzf ffmpeg
+curl -fsSL https://raw.githubusercontent.com/Abhijit-without-h/flashare/main/install.sh | sh
 ```
 
-### Install Flashare
+### Windows (PowerShell)
+```powershell
+irm https://raw.githubusercontent.com/Abhijit-without-h/flashare/main/install.ps1 | iex
+```
 
+### Dependencies
+Flashare relies on `fzf` for file selection and `ffmpeg` for video optimization.
 ```bash
-# Clone the repository
-cd /path/to/flashare
+# macOS
+brew install fzf ffmpeg
 
-# Install with uv
-uv sync
-
-# Or install with pip
-pip install -e .
+# Linux
+sudo apt install fzf ffmpeg
 ```
 
 ---
@@ -50,10 +48,7 @@ pip install -e .
 
 ```bash
 # Start the file sharing wizard
-share
-
-# Or using uv
-uv run share
+flashare
 ```
 
 This will:
@@ -66,26 +61,25 @@ This will:
 
 ```bash
 # Share a specific file
-share /path/to/file.pdf
+flashare /path/to/file.pdf
 
 # Start server only (share all files in uploads/)
-share --server-only
+flashare --server-only
 
 # Custom port
-share --port 9000
+flashare --port 9000
 
 # Skip video optimization
-share --no-optimize
+flashare --no-optimize
 
 # Start from a specific directory
-share --directory ~/Documents
+flashare --directory ~/Documents
 ```
 
 ### Mobile Access
 
 1. **QR Code**: Scan the QR code displayed in the terminal
 2. **URL**: Navigate to the URL shown (e.g., `http://192.168.1.10:8000`)
-3. **Bluetooth (Android)**: Tap "Scan Bluetooth" in the mobile app
 
 ---
 
@@ -102,7 +96,6 @@ flashare/
 │   ├── core/
 │   │   ├── network.py      # IP detection
 │   │   ├── compression.py  # Zstandard compression
-│   │   ├── ble.py          # BLE advertising
 │   │   ├── qr.py           # QR code generation
 │   │   └── ffmpeg.py       # Video optimization
 │   ├── api/
