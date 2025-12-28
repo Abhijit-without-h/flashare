@@ -5,7 +5,7 @@
 
 ### Fast, Local, CLI-First File Sharing
 
-[![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/Abhijit-without-h/flashare?style=flat-square&color=black)]([https://github.com/Abhijit-without-h/flashare/releases](https://github.com/Abhijit-without-h/flashare/releases/tag/improved))
+[![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/Abhijit-without-h/flashare?style=flat-square&color=black)](https://github.com/Abhijit-without-h/flashare/releases)
 [![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-linux%20%7C%20macos%20%7C%20windows-lightgrey?style=flat-square)](https://github.com/Abhijit-without-h/flashare)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
