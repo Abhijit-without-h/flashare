@@ -18,9 +18,12 @@ jobs:
           - os: ubuntu-latest
             artifact_name: flashare-linux-amd64
             asset_name: flashare-linux-amd64
-          - os: macos-latest
+          - os: macos-13
             artifact_name: flashare-darwin-amd64
             asset_name: flashare-darwin-amd64
+          - os: macos-14
+            artifact_name: flashare-darwin-arm64
+            asset_name: flashare-darwin-arm64
           - os: windows-latest
             artifact_name: flashare-windows-amd64.exe
             asset_name: flashare-windows-amd64.exe
