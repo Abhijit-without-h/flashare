@@ -57,9 +57,8 @@ curl -fsSL [https://raw.githubusercontent.com/Abhijit-without-h/flashare/main/in
 ```
 
 ### Windows (PowerShell)
-
 ```powershell
-irm [https://raw.githubusercontent.com/Abhijit-without-h/flashare/main/install.ps1](https://raw.githubusercontent.com/Abhijit-without-h/flashare/main/install.ps1) | iex
+irm https://raw.githubusercontent.com/Abhijit-without-h/flashare/main/install.ps1 | iex
 
 ```
 
