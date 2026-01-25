@@ -1,8 +1,11 @@
-name: Build and Release Binaries
+name: Build and Release
 
 on:
   release:
     types: [created]
+  push:
+    tags:
+      - 'v*'
   workflow_dispatch:
 
 permissions:
@@ -10,84 +13,86 @@ permissions:
 
 jobs:
   build:
-    name: Build for ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
+    name: Build for ${{ matrix.goos }}/${{ matrix.goarch }}
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         include:
-          - os: ubuntu-latest
+          - goos: linux
+            goarch: amd64
             artifact_name: flashare-linux-amd64
-            asset_name: flashare-linux-amd64
-          - os: macos-13
+          - goos: linux
+            goarch: arm64
+            artifact_name: flashare-linux-arm64
+          - goos: darwin
+            goarch: amd64
             artifact_name: flashare-darwin-amd64
-            asset_name: flashare-darwin-amd64
-          - os: macos-14
+          - goos: darwin
+            goarch: arm64
             artifact_name: flashare-darwin-arm64
-            asset_name: flashare-darwin-arm64
-          - os: windows-latest
+          - goos: windows
+            goarch: amd64
             artifact_name: flashare-windows-amd64.exe
-            asset_name: flashare-windows-amd64.exe
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Set up Go
+        uses: actions/setup-go@v5
         with:
-          python-version: "3.11"
+          go-version: '1.23'
+          cache: true
 
-      - name: Install dependencies
-        run: |
-          pip install uv
-          uv sync 
-          uv pip install pyinstaller
+      - name: Get version
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
 
-      - name: Build with PyInstaller (Unix)
-        if: matrix.os != 'windows-latest'
+      - name: Build binary
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          CGO_ENABLED: 0
         run: |
-          # Create a simple entry point script
-          echo "from flashare.cli.main import main; main()" > run_flashare.py
+          VERSION="${{ steps.version.outputs.VERSION }}"
+          COMMIT="${GITHUB_SHA::8}"
+          DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
           
-          # Build
-          uv run pyinstaller --onefile --name flashare \
-            --add-data "src/flashare/static:flashare/static" \
-            --hidden-import="uvicorn.logging" \
-            --hidden-import="uvicorn.loops" \
-            --hidden-import="uvicorn.loops.auto" \
-            --hidden-import="uvicorn.protocols" \
-            --hidden-import="uvicorn.protocols.http" \
-            --hidden-import="uvicorn.protocols.http.auto" \
-            --hidden-import="uvicorn.lifespan" \
-            --hidden-import="uvicorn.lifespan.on" \
-            run_flashare.py
+          LDFLAGS="-s -w -X main.version=${VERSION} -X main.commit=${COMMIT} -X main.date=${DATE}"
           
-          # Rename and move
-          mv dist/flashare dist/${{ matrix.artifact_name }}
+          go build -ldflags "${LDFLAGS}" -o ${{ matrix.artifact_name }} ./cmd/flashare
+          
+          # Compress with UPX if available (reduces size by ~60%)
+          if command -v upx &> /dev/null && [ "${{ matrix.goos }}" != "darwin" ]; then
+            upx --best --lzma ${{ matrix.artifact_name }} || true
+          fi
 
-      - name: Build with PyInstaller (Windows)
-        if: matrix.os == 'windows-latest'
-        run: |
-          # Create a simple entry point script
-          echo "from flashare.cli.main import main; main()" > run_flashare.py
-          
-          # Build (Note semicolon for add-data on Windows)
-          uv run pyinstaller --onefile --name flashare `
-            --add-data "src/flashare/static;flashare/static" `
-            --hidden-import="uvicorn.logging" `
-            --hidden-import="uvicorn.loops" `
-            --hidden-import="uvicorn.loops.auto" `
-            --hidden-import="uvicorn.protocols" `
-            --hidden-import="uvicorn.protocols.http" `
-            --hidden-import="uvicorn.protocols.http.auto" `
-            --hidden-import="uvicorn.lifespan" `
-            --hidden-import="uvicorn.lifespan.on" `
-            run_flashare.py
-          
-          # Rename and move
-          mv dist/flashare.exe dist/${{ matrix.artifact_name }}
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: ${{ matrix.artifact_name }}
 
       - name: Upload Release Asset
-        uses: softprops/action-gh-release@v1
-        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
         with:
-          files: dist/${{ matrix.artifact_name }}
+          files: ${{ matrix.artifact_name }}
+
+  checksums:
+    name: Generate checksums
+    runs-on: ubuntu-latest
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+
+      - name: Generate checksums
+        run: |
+          sha256sum flashare-*/flashare-* > checksums.txt
+          cat checksums.txt
+
+      - name: Upload checksums
+        uses: softprops/action-gh-release@v2
+        with:
+          files: checksums.txt

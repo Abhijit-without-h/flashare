@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0a0a0f">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="description" content="Flashare - Fast, secure file sharing between devices">
+    <title>Flashare - File Sharing</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <span class="logo-icon">⚡</span>
+                <span class="logo-text">Flashare</span>
+            </div>
+            <div class="header-actions">
+                <button class="btn-icon" id="themeToggle" title="Toggle Theme">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="5" />
+                        <path
+                            d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+                    </svg>
+                </button>
+                <button class="btn-icon" id="refreshBtn" title="Refresh">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M23 4v6h-6M1 20v-6h6" />
+                        <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" />
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            <!-- Status Card -->
+            <div class="status-card glass" id="statusCard">
+                <div class="status-indicator online"></div>
+                <div class="status-text">
+                    <span class="status-label">Connected</span>
+                    <span class="status-url" id="serverUrl">-</span>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="actions">
+                <button class="btn btn-primary" id="uploadBtn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+                        <polyline points="17 8 12 3 7 8" />
+                        <line x1="12" y1="3" x2="12" y2="15" />
+                    </svg>
+                    Upload Files
+                    <span class="upload-badge" id="uploadBadge" hidden>0</span>
+                </button>
+                <button class="btn btn-secondary" id="selectModeBtn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                        <polyline points="9 11 12 14 22 4" />
+                    </svg>
+                    Select
+                </button>
+            </div>
+
+            <!-- Mobile Capture Buttons -->
+            <div class="mobile-capture" id="mobileCapture">
+                <button class="capture-btn" id="capturePhotoBtn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" />
+                        <circle cx="12" cy="13" r="4" />
+                    </svg>
+                    <span>Camera</span>
+                </button>
+                <button class="capture-btn" id="captureGalleryBtn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                        <circle cx="8.5" cy="8.5" r="1.5" />
+                        <polyline points="21 15 16 10 5 21" />
+                    </svg>
+                    <span>Gallery</span>
+                </button>
+                <input type="file" id="cameraInput" hidden accept="image/*" capture="environment">
+                <input type="file" id="galleryInput" hidden accept="image/*,video/*" multiple>
+            </div>
+
+            <!-- File List -->
+            <section class="files-section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <span>Available Files</span>
+                        <span class="file-count" id="fileCount">0</span>
+                    </h2>
+                    <div class="batch-actions" id="batchActions" hidden>
+                        <button class="btn btn-ghost btn-sm" id="selectAllBtn">Select All</button>
+                        <button class="btn btn-ghost btn-sm" id="downloadSelectedBtn">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+                                <polyline points="7 10 12 15 17 10" />
+                                <line x1="12" y1="15" x2="12" y2="3" />
+                            </svg>
+                            Download
+                        </button>
+                        <button class="btn btn-ghost btn-sm" id="deleteSelectedBtn">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <polyline points="3 6 5 6 21 6" />
+                                <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+                            </svg>
+                            Delete
+                        </button>
+                    </div>
+                </div>
+                <div class="file-list" id="fileList">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <span>Loading files...</span>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Upload Modal -->
+        <div class="modal" id="uploadModal">
+            <div class="modal-backdrop"></div>
+            <div class="modal-content glass">
+                <div class="modal-header">
+                    <h3>Upload Files</h3>
+                    <button class="btn-icon btn-close" id="closeModalBtn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18" />
+                            <line x1="6" y1="6" x2="18" y2="18" />
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="upload-area" id="uploadArea">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="1.5">
+                        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+                        <polyline points="17 8 12 3 7 8" />
+                        <line x1="12" y1="3" x2="12" y2="15" />
+                    </svg>
+                    <p>Tap to select files</p>
+                    <p class="hint">or drag and drop multiple files</p>
+                    <p class="hint">Photos, Videos, Documents supported</p>
+                </div>
+
+                <!-- File Queue Preview -->
+                <div class="file-queue" id="fileQueue" hidden>
+                    <div class="queue-header">
+                        <span class="queue-count" id="queueCount">0 files selected</span>
+                        <button class="btn btn-ghost btn-sm" id="clearQueueBtn">Clear All</button>
+                    </div>
+                    <div class="queue-list" id="queueList"></div>
+                    <div class="queue-footer">
+                        <span class="queue-size" id="queueSize">Total: 0 KB</span>
+                    </div>
+                </div>
+
+                <!-- Upload Progress -->
+                <div class="upload-progress-container" id="uploadProgressContainer" hidden>
+                    <div class="progress-header">
+                        <span class="progress-title">Uploading files...</span>
+                        <span class="progress-stats" id="progressStats">0 / 0</span>
+                    </div>
+                    <div class="progress-bar overall">
+                        <div class="progress-fill" id="overallProgressFill"></div>
+                    </div>
+                    <div class="progress-list" id="progressList"></div>
+                </div>
+
+                <div class="modal-actions">
+                    <button class="btn btn-ghost" id="cancelUploadBtn">Cancel</button>
+                    <button class="btn btn-primary" id="startUploadBtn" disabled>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+                            <polyline points="17 8 12 3 7 8" />
+                            <line x1="12" y1="3" x2="12" y2="15" />
+                        </svg>
+                        Upload All
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast Container -->
+        <div class="toast-container" id="toastContainer"></div>
+
+        <!-- Hidden File Inputs -->
+        <input type="file" id="hiddenFileInput" hidden multiple
+            accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.txt,.zip,.rar,.7z,.json,.csv,.xls,.xlsx">
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+
+</html>

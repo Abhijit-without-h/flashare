@@ -1,59 +1,38 @@
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
+# Binaries
+bin/
+*.exe
+*.exe~
+*.dll
 *.so
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
+*.dylib
+flashare
 
-# Virtual environments
-.venv/
-venv/
-ENV/
-env/
+# Test binary, built with `go test -c`
+*.test
 
-# uv
-uv.lock
+# Output of the go coverage tool
+*.out
+
+# Go workspace file
+go.work
 
 # IDE
 .idea/
 .vscode/
 *.swp
 *.swo
-*~
-.DS_Store
 
-# Uploads (user files - don't commit personal data)
+# OS files
+.DS_Store
+Thumbs.db
+
+# Uploads directory
 uploads/
+*.upload
 
 # Logs
 *.log
 
-# Environment variables / secrets
+# Environment
 .env
 .env.local
-.env.*.local
-
-# Test / Coverage
-.coverage
-htmlcov/
-.pytest_cache/
-.tox/
-
-# Build artifacts
-*.pyc
-*.pyo

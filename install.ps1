@@ -1,63 +1,60 @@
-# Flashare Installer (Windows PowerShell)
+# Flashare Install Script for Windows
+# Downloads the latest release binary and installs it
 
-$repo = "Abhijit-without-h/flashare"
-$binaryName = "flashare.exe"
-$installDir = Join-Path $HOME ".flashare\bin"
 $ErrorActionPreference = "Stop"
 
-Write-Host "⚡ Installing Flashare..." -ForegroundColor Cyan
+Write-Host "⚡ Flashare Installer" -ForegroundColor Blue
+Write-Host ""
 
-# Ensure install directory exists
-if (!(Test-Path $installDir)) {
-    New-Item -ItemType Directory -Path $installDir | Out-Null
-}
+# Detect architecture
+$Arch = if ([System.Environment]::Is64BitOperatingSystem) { "amd64" } else { "386" }
 
-# Detect Architecture
-$arch = $env:PROCESSOR_ARCHITECTURE.ToLower()
-if ($arch -eq "amd64") {
-    $arch = "amd64"
-} elseif ($arch -eq "arm64") {
-    $arch = "arm64"
-} else {
-    Write-Error "Unsupported architecture: $arch"
-    exit 1
-}
+$BinaryName = "flashare-windows-$Arch.exe"
+$InstallDir = "$env:LOCALAPPDATA\Flashare"
+$GithubRepo = "Abhijit-without-h/flashare"
 
-$assetName = "flashare-windows-$arch.exe"
+Write-Host "Detected: windows/$Arch" -ForegroundColor Green
 
-# Fetch latest release URL
-Write-Host "🔍 Finding latest release..." -ForegroundColor Cyan
+# Create install directory
+New-Item -ItemType Directory -Force -Path $InstallDir | Out-Null
+
+$LatestUrl = "https://github.com/$GithubRepo/releases/latest/download/$BinaryName"
+$DestPath = "$InstallDir\flashare.exe"
+
+Write-Host "Downloading from GitHub releases..."
+
 try {
-    # Get the first item from the releases list (supports pre-releases)
-    $releaseInfo = Invoke-RestMethod -Uri "https://api.github.com/repos/$repo/releases?per_page=1"
-    # releaseInfo might be an array if there are multiple releases, but per_page=1 should return an array of 1
-    if ($releaseInfo -is [array]) {
-        $releaseInfo = $releaseInfo[0]
-    }
-    $asset = $releaseInfo.assets | Where-Object { $_.name -eq $assetName }
+    Invoke-WebRequest -Uri $LatestUrl -OutFile $DestPath -UseBasicParsing
+    Write-Host "✓ Downloaded flashare to $DestPath" -ForegroundColor Green
 } catch {
-    Write-Error "❌ API Request failed. Please check your internet connection."
-    exit 1
+    Write-Host "Release not found, building from source..." -ForegroundColor Yellow
+    
+    # Check for Go
+    if (-not (Get-Command go -ErrorAction SilentlyContinue)) {
+        Write-Host "Go is not installed. Please install Go 1.21+ first:" -ForegroundColor Red
+        Write-Host "  https://go.dev/dl/"
+        exit 1
+    }
+    
+    # Clone and build
+    $TempDir = New-TemporaryFile | ForEach-Object { Remove-Item $_; New-Item -ItemType Directory -Path $_ }
+    git clone --depth 1 "https://github.com/$GithubRepo.git" $TempDir
+    Push-Location $TempDir
+    go build -o $DestPath ./cmd/flashare
+    Pop-Location
+    Remove-Item -Recurse -Force $TempDir
+    
+    Write-Host "✓ Built and installed flashare" -ForegroundColor Green
 }
 
-if ($null -eq $asset) {
-    Write-Error "❌ Could not find binary for Windows-$arch in the latest release."
-    Write-Host "This might mean the release is still building. Please try again later." -ForegroundColor Yellow
-    exit 1
+# Add to PATH
+$UserPath = [Environment]::GetEnvironmentVariable("Path", "User")
+if ($UserPath -notlike "*$InstallDir*") {
+    [Environment]::SetEnvironmentVariable("Path", "$UserPath;$InstallDir", "User")
+    Write-Host "✓ Added to PATH" -ForegroundColor Green
 }
 
-$downloadUrl = $asset.browser_download_url
-
-Write-Host "📥 Downloading $assetName..." -ForegroundColor Cyan
-Invoke-WebRequest -Uri $downloadUrl -OutFile (Join-Path $installDir $binaryName) -UseBasicParsing
-
-# Add to PATH if not already present
-$currentPath = [Environment]::GetEnvironmentVariable("Path", "User")
-if ($currentPath -notlike "*$installDir*") {
-    Write-Host "⚙️  Adding $installDir to User PATH..." -ForegroundColor Cyan
-    [Environment]::SetEnvironmentVariable("Path", "$currentPath;$installDir", "User")
-    Write-Host "⚠️  Please restart your terminal for changes to take effect." -ForegroundColor Yellow
-}
-
-Write-Host "✅ Flashare installed successfully!" -ForegroundColor Green
-Write-Host "🚀 Run 'flashare --help' (might need a terminal restart)." -ForegroundColor Green
+Write-Host ""
+Write-Host "✓ Installation complete!" -ForegroundColor Green
+Write-Host ""
+Write-Host "Restart your terminal and run 'flashare' to start." -ForegroundColor Cyan
