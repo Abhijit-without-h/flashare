@@ -52,7 +52,7 @@ Flashare installs as a **single binary** with no required runtime dependencies.
 
 ### macOS / Linux
 ```bash
-curl -fsSL [https://raw.githubusercontent.com/Abhijit-without-h/flashare/main/install.sh](https://raw.githubusercontent.com/Abhijit-without-h/flashare/main/install.sh) | sh
+curl -fsSL https://raw.githubusercontent.com/Abhijit-without-h/flashare/main/install.sh | sh
 
 ```
 
