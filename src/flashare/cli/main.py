@@ -217,23 +217,5 @@ def _start_server(host: str, port: int):
         print_success("Server stopped. Goodbye!")
 
 
-def _start_server(host: str, port: int):
-    """Start the FastAPI server."""
-    from flashare.server import run_server
-    
-    console.print()
-    print_server_info(host, port)
-    print_qr_code(port)
-    
-    print_info("Starting server... Press [bold]Ctrl+C[/] to stop.")
-    console.print()
-    
-    try:
-        run_server(host, port)
-    except KeyboardInterrupt:
-        console.print()
-        print_success("Server stopped. Goodbye!")
-
-
 if __name__ == "__main__":
     main()
